@@ -1,0 +1,33 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MatMul
+
+RWStructuredBuffer<float> bufferA;
+RWStructuredBuffer<float> bufferB;
+RWStructuredBuffer<float> result;
+
+uint AH;
+uint BW;
+uint N;
+
+[numthreads(256,1,1)]
+void MatMul(uint3 id : SV_DispatchThreadID)
+{
+    float sum = 0.0f;
+
+    for (uint i = 0; i < N; i++)
+    {
+        uint INDEX = id.x;
+        uint x = INDEX % BW;
+        uint y = floor(INDEX / BW);
+
+        uint aw = i;
+        uint ah = y;
+
+        uint bw = x;
+        uint bh = i;
+
+        sum += bufferA[ah * N + aw] * bufferB[bh * BW + bw];
+    }
+
+    result[id.x] = sum;
+}
